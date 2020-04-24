@@ -32,17 +32,12 @@ public class SSOChaincode implements ContractInterface {
     }
 
     @Transaction()
-    public void initLedger(final Context ctx){
+    public void initLedger(final Context ctx){  // 체인코드 초기화 작업 수행.
+        // TODO:: 배치성 작업을 위한 스레드 같은거 돌려놔도 잘 동작하는지 테스트해보기.. 안된다면 애플리케이션 단에 배치 작업 만들어두고 컨트렉트 호출하게끔 구현해야함..
+
         ChaincodeStub stub = ctx.getStub();
 
-        String[] userData = {
 
-        };
-
-        for (int i = 0; i < userData.length; i++) {
-            String key = String.format("USER%d", i);
-
-        }
     }
 
 }
