@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url "https://hyperledger.jfrog.io/hyperledger/fabric-maven"
+    }
+    jcenter()
+    maven {
+        url 'https://jitpack.io'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation 'org.hyperledger.fabric-chaincode-java:fabric-chaincode-shim:2.+'
+    implementation 'com.owlike:genson:1.5'
+}
