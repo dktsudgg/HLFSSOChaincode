@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library-distribution'
 }
 
 group 'com.cw.chaincode'
