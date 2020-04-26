@@ -1,4 +1,4 @@
-package com.cw.chaincode;
+package com.cw.chaincode.ssochaincode;
 
 public class SSOChaincodeQueryResult {
 }
