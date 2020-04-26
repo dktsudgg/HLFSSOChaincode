@@ -1,3 +1,5 @@
+package com.cw.chaincode;
+
 import com.owlike.genson.Genson;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
@@ -5,7 +7,7 @@ import org.hyperledger.fabric.contract.annotation.*;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
 @Contract(
-    name = "SSOChaincode",
+    name = "com.cw.chaincode.SSOChaincode",
     info = @Info(
         title = "SSOChain contract",
         description = "The hyperlegendary SSOChain contract",
