@@ -40,4 +40,10 @@ public class SSOChaincode implements ContractInterface {
 
     }
 
+    @Transaction()
+    public String queryLedger(final Context context, String key){
+        String asdf = "asdf";
+        return asdf;
+    }
+
 }
