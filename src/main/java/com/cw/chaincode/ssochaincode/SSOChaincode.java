@@ -4,6 +4,7 @@ import com.owlike.genson.Genson;
 import org.hyperledger.fabric.contract.Context;
 import org.hyperledger.fabric.contract.ContractInterface;
 import org.hyperledger.fabric.contract.annotation.*;
+import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
 
 @Contract(
@@ -34,18 +35,62 @@ public class SSOChaincode implements ContractInterface {
     }
 
     @Transaction()
-    public void initLedger(final Context ctx){  // 체인코드 초기화 작업 수행.
-        // TODO:: 배치성 작업을 위한 스레드 같은거 돌려놔도 잘 동작하는지 테스트해보기.. 안된다면 애플리케이션 단에 배치 작업 만들어두고 컨트렉트 호출하게끔 구현해야함..
+    public void initLedger(final Context ctx){
+
+        // TODO:: Thread test..
 
         ChaincodeStub stub = ctx.getStub();
 
+        String[] testData = {
+                "{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\"}",
+                "{\"ci\":\"ci_1\",\"publicKey\":\"publicKey_1\"}",
+                "{\"ci\":\"ci_2\",\"publicKey\":\"publicKey_2\"}",
+                "{\"ci\":\"ci_3\",\"publicKey\":\"publicKey_3\"}",
+                "{\"ci\":\"ci_4\",\"publicKey\":\"publicKey_4\"}",
+                "{\"ci\":\"ci_5\",\"publicKey\":\"publicKey_5\"}",
+        };
+
+        for(int i=0; i<testData.length; i++){
+            String key = String.format("PUBKEY%d", i);
+            UserPublicKey userPublicKey = genson.deserialize(testData[i], UserPublicKey.class);
+            String userPublicKeyState = genson.serialize(userPublicKey);
+            stub.putStringState(key, userPublicKeyState);
+        }
 
     }
 
     @Transaction()
-    public String queryLedger(final Context context, String key){
-        String asdf = "asdf";
-        return asdf;
+    public UserPublicKey createUserPublicKey(final Context ctx, final String key, final String ci, final String publicKey){
+        ChaincodeStub stub = ctx.getStub();
+
+        String userPublicKeyState = stub.getStringState(key);
+        if(!userPublicKeyState.isEmpty()){
+            String errorMessage = String.format("UserPublicKey %s already exists", key);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, SSOChainErrors.ALREADY_EXISTS.toString());
+        }
+
+        UserPublicKey userPublicKey = new UserPublicKey(ci, publicKey);
+        userPublicKeyState = genson.serialize(userPublicKey);
+        stub.putStringState(key, userPublicKeyState);
+
+        return userPublicKey;
+    }
+
+    @Transaction()
+    public UserPublicKey queryLedger(final Context ctx, final String key){
+        ChaincodeStub stub = ctx.getStub();
+        String userPublicKeyState = stub.getStringState(key);
+
+        if (userPublicKeyState.isEmpty()) {
+            String errorMessage = String.format("UserPublicKey %s does not exist", key);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, SSOChainErrors.NOT_FOUND.toString());
+        }
+
+        UserPublicKey userPublicKey = genson.deserialize(userPublicKeyState, UserPublicKey.class);
+
+        return userPublicKey;
     }
 
 }
