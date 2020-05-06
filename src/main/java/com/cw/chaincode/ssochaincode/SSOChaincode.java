@@ -42,12 +42,12 @@ public class SSOChaincode implements ContractInterface {
         ChaincodeStub stub = ctx.getStub();
 
         String[] testData = {
-                "{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\"}",
-                "{\"ci\":\"ci_1\",\"publicKey\":\"publicKey_1\"}",
-                "{\"ci\":\"ci_2\",\"publicKey\":\"publicKey_2\"}",
-                "{\"ci\":\"ci_3\",\"publicKey\":\"publicKey_3\"}",
-                "{\"ci\":\"ci_4\",\"publicKey\":\"publicKey_4\"}",
-                "{\"ci\":\"ci_5\",\"publicKey\":\"publicKey_5\"}",
+                "{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\",\"num1\":123,\"num2\":456}",
+                "{\"ci\":\"ci_1\",\"publicKey\":\"publicKey_1\",\"num1\":123,\"num2\":456}",
+                "{\"ci\":\"ci_2\",\"publicKey\":\"publicKey_2\",\"num1\":123,\"num2\":456}",
+                "{\"ci\":\"ci_3\",\"publicKey\":\"publicKey_3\",\"num1\":123,\"num2\":456}",
+                "{\"ci\":\"ci_4\",\"publicKey\":\"publicKey_4\",\"num1\":123,\"num2\":456}",
+                "{\"ci\":\"ci_5\",\"publicKey\":\"publicKey_5\",\"num1\":123,\"num2\":456}",
         };
 
         for(int i=0; i<testData.length; i++){
@@ -70,7 +70,7 @@ public class SSOChaincode implements ContractInterface {
             throw new ChaincodeException(errorMessage, SSOChainErrors.ALREADY_EXISTS.toString());
         }
 
-        UserPublicKey userPublicKey = new UserPublicKey(ci, publicKey);
+        UserPublicKey userPublicKey = new UserPublicKey(ci, publicKey, 123, 456);
         userPublicKeyState = genson.serialize(userPublicKey);
         stub.putStringState(key, userPublicKeyState);
 
@@ -78,7 +78,7 @@ public class SSOChaincode implements ContractInterface {
     }
 
     @Transaction()
-    public UserPublicKey queryLedger(final Context ctx, final String key){
+    public UserPublicKey queryLedger(final Context ctx, final String key, final int num1){
         ChaincodeStub stub = ctx.getStub();
         String userPublicKeyState = stub.getStringState(key);
 
@@ -89,8 +89,41 @@ public class SSOChaincode implements ContractInterface {
         }
 
         UserPublicKey userPublicKey = genson.deserialize(userPublicKeyState, UserPublicKey.class);
+        UserPublicKey newUserPublicKey = new UserPublicKey(userPublicKey.getCi(), userPublicKey.getPublicKey(), num1, userPublicKey.getNum2()+num1);
 
-        return userPublicKey;
+        String newUserPublicKeyState = genson.serialize(newUserPublicKey);
+        stub.putStringState(key, newUserPublicKeyState);
+
+        return newUserPublicKey;
+    }
+
+    @Transaction()
+    public UserPublicKey querySumLedger(final Context ctx, final String key, final String key2){
+        ChaincodeStub stub = ctx.getStub();
+        String userPublicKeyState = stub.getStringState(key);
+        String userPublicKeyState2 = stub.getStringState(key2);
+
+        if (userPublicKeyState.isEmpty()) {
+            String errorMessage = String.format("UserPublicKey %s does not exist", key);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, SSOChainErrors.NOT_FOUND.toString());
+        }
+
+        if (userPublicKeyState2.isEmpty()) {
+            String errorMessage = String.format("UserPublicKey2 %s does not exist", key2);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, SSOChainErrors.NOT_FOUND.toString());
+        }
+
+        UserPublicKey userPublicKey = genson.deserialize(userPublicKeyState, UserPublicKey.class);
+        UserPublicKey userPublicKey2 = genson.deserialize(userPublicKeyState2, UserPublicKey.class);
+        UserPublicKey newUserPublicKey = new UserPublicKey(userPublicKey.getCi(), userPublicKey.getPublicKey()
+                , userPublicKey.getNum1()+userPublicKey2.getNum1(), userPublicKey.getNum2() + userPublicKey2.getNum2());
+
+        String newUserPublicKeyState = genson.serialize(newUserPublicKey);
+        stub.putStringState(key, newUserPublicKeyState);
+
+        return newUserPublicKey;
     }
 
 }

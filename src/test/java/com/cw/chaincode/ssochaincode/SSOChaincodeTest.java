@@ -57,12 +57,12 @@ public class SSOChaincodeTest {
 
             userPublicKeyList = new ArrayList<KeyValue>();
 
-            userPublicKeyList.add(new MockKeyValue("PUBKEY0", "{ \"ci\": \"ci_0\", \"publicKey\": \"publicKey_0\"}"));
-            userPublicKeyList.add(new MockKeyValue("PUBKEY1", "{ \"ci\": \"ci_1\", \"publicKey\": \"publicKey_1\"}"));
-            userPublicKeyList.add(new MockKeyValue("PUBKEY2", "{ \"ci\": \"ci_2\", \"publicKey\": \"publicKey_2\"}"));
-            userPublicKeyList.add(new MockKeyValue("PUBKEY3", "{ \"ci\": \"ci_3\", \"publicKey\": \"publicKey_3\"}"));
-            userPublicKeyList.add(new MockKeyValue("PUBKEY4", "{ \"ci\": \"ci_4\", \"publicKey\": \"publicKey_4\"}"));
-            userPublicKeyList.add(new MockKeyValue("PUBKEY5", "{ \"ci\": \"ci_5\", \"publicKey\": \"publicKey_5\"}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY0", "{ \"ci\": \"ci_0\", \"publicKey\": \"publicKey_0\",\"num1\":123,\"num2\":456}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY1", "{ \"ci\": \"ci_1\", \"publicKey\": \"publicKey_1\",\"num1\":123,\"num2\":456}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY2", "{ \"ci\": \"ci_2\", \"publicKey\": \"publicKey_2\",\"num1\":123,\"num2\":456}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY3", "{ \"ci\": \"ci_3\", \"publicKey\": \"publicKey_3\",\"num1\":123,\"num2\":456}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY4", "{ \"ci\": \"ci_4\", \"publicKey\": \"publicKey_4\",\"num1\":123,\"num2\":456}"));
+            userPublicKeyList.add(new MockKeyValue("PUBKEY5", "{ \"ci\": \"ci_5\", \"publicKey\": \"publicKey_5\",\"num1\":123,\"num2\":456}"));
 
         }
 
@@ -102,11 +102,11 @@ public class SSOChaincodeTest {
         ChaincodeStub stub = mock(ChaincodeStub.class);
         when(ctx.getStub()).thenReturn(stub);
         when(stub.getStringState("PUBKEY1"))
-                .thenReturn("{ \"ci\": \"ci_1\", \"publicKey\": \"publicKey_1\"}");
+                .thenReturn("{ \"ci\": \"ci_1\", \"publicKey\": \"publicKey_1\",\"num1\":123,\"num2\":456}");
 
-        UserPublicKey userPublicKey = contract.queryLedger(ctx, "PUBKEY1");
+        UserPublicKey userPublicKey = contract.queryLedger(ctx, "PUBKEY1", 1);
 
-        assertThat(userPublicKey).isEqualTo(new UserPublicKey("ci_1", "publicKey_1"));
+        assertThat(userPublicKey).isEqualTo(new UserPublicKey("ci_1", "publicKey_1", 1, 457));
     }
 
     @Test
@@ -119,7 +119,7 @@ public class SSOChaincodeTest {
         when(stub.getStringState("PUBKEY0")).thenReturn("");
 
         Throwable thrown = catchThrowable(() -> {
-            contract.queryLedger(ctx, "PUBKEY0");
+            contract.queryLedger(ctx, "PUBKEY0", 1);
         });
 
         assertThat(thrown).isInstanceOf(ChaincodeException.class).hasNoCause()
@@ -139,17 +139,17 @@ public class SSOChaincodeTest {
 
         InOrder inOrder = inOrder(stub);
         inOrder.verify(stub).putStringState("PUBKEY0",
-                "{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\"}");
+                "{\"ci\":\"ci_0\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_0\"}");
         inOrder.verify(stub).putStringState("PUBKEY1",
-                "{\"ci\":\"ci_1\",\"publicKey\":\"publicKey_1\"}");
+                "{\"ci\":\"ci_1\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_1\"}");
         inOrder.verify(stub).putStringState("PUBKEY2",
-                "{\"ci\":\"ci_2\",\"publicKey\":\"publicKey_2\"}");
+                "{\"ci\":\"ci_2\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_2\"}");
         inOrder.verify(stub).putStringState("PUBKEY3",
-                "{\"ci\":\"ci_3\",\"publicKey\":\"publicKey_3\"}");
+                "{\"ci\":\"ci_3\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_3\"}");
         inOrder.verify(stub).putStringState("PUBKEY4",
-                "{\"ci\":\"ci_4\",\"publicKey\":\"publicKey_4\"}");
+                "{\"ci\":\"ci_4\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_4\"}");
         inOrder.verify(stub).putStringState("PUBKEY5",
-                "{\"ci\":\"ci_5\",\"publicKey\":\"publicKey_5\"}");
+                "{\"ci\":\"ci_5\",\"num1\":123,\"num2\":456,\"publicKey\":\"publicKey_5\"}");
     }
 
     @Test
@@ -160,7 +160,7 @@ public class SSOChaincodeTest {
         ChaincodeStub stub = mock(ChaincodeStub.class);
         when(ctx.getStub()).thenReturn(stub);
         when(stub.getStringState("PUBKEY0"))
-                .thenReturn("{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\"}");
+                .thenReturn("{\"ci\":\"ci_0\",\"publicKey\":\"publicKey_0\",\"num1\":123,\"num2\":456}");
 
         Throwable thrown = catchThrowable(() -> {
             contract.createUserPublicKey(ctx, "PUBKEY0", "ci_0", "publicKey_0");
@@ -182,7 +182,7 @@ public class SSOChaincodeTest {
 
         UserPublicKey car = contract.createUserPublicKey(ctx, "PUBKEY0", "ci_0", "publicKey_0");
 
-        assertThat(car).isEqualTo(new UserPublicKey("ci_0", "publicKey_0"));
+        assertThat(car).isEqualTo(new UserPublicKey("ci_0", "publicKey_0", 123, 456));
     }
 
 }
